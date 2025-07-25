@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Parking System Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>System Settings</h3>
+        <button class="close-modal" id="closeSettingsModal">&times;</button>
+      </div>
+      
+      <div class="payment-form">
+        <div class="form-group">
+          <label for="parkingRate">Hourly Parking Rate ($)</label>
+          <input type="number" id="parkingRate" placeholder="5.00" step="0.01" min="0">
+        </div>
+        
+        <div class="form-group">
+          <label for="totalSlots">Total Parking Slots</label>
+          <input type="number" id="totalSlots" placeholder="50" min="1">
+        </div>
+        
+        <div class="form-group">
+          <label for="businessHours">Business Hours</label>
+          <input type="text" id="businessHours" placeholder="8:00 AM - 10:00 PM">
+        </div>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="enableNotifications">
+            Enable Email Notifications
+          </label>
+        </div>
+        
+        <button class="submit-payment" id="saveSettings">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <i class="fas fa-parking" style="font-size: 24px; color: var(--primary);"></i>
+      <h2>Parking System</h2>
+    </div>
+    <div class="sidebar-menu">
+      <a href="#" class="menu-item active">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Reservations</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-chart-line"></i>
+        <span>Analytics</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-users"></i>
+        <span>Customers</span>
+      </a>
+      <a href="#" class="menu-item" id="paymentsMenuItem">
+        <i class="fas fa-file-invoice-dollar"></i>
+        <span>Payments</span>
+      </a>
+      <a href="#" class="menu-item" id="settingsMenuItem">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </div>
+        <h1>Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="notification-icon">
+          <i class="fas fa-bell"></i>
+        </div>
+        <div class="user-profile" id="userProfile">
+          <div class="user-avatar">AD</div>
+          <div>
+            <div style="font-weight: 600;">Admin User</div>
+            <div style="font-size: 12px; color: var(--gray);">Administrator</div>
+          </div>
+          <div class="user-profile-menu" id="userProfileMenu">
+            <a href="admin-login.html">
+              <i class="fas fa-user-shield"></i> Admin Login
+            </a>
+            <a href="parking-user.html">
+              <i class="fas fa-user"></i> Parking User
+            </a>
+            <a href="#">
+              <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="#">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="container">
+      <div class="content-header">
+        <h2><i class="fas fa-parking"></i> Parking System Overview</h2>
+        <div class="time">Last updated: <span id="updateTime">Just now</span></div>
+      </div>
+
+      <div class="stats-container">
+        <div class="stat-card available">
+          <h3>Available Slots</h3>
+          <div class="value" id="availableSlots">0</div>
+          <div class="change"><i class="fas fa-arrow-up"></i> 12% from yesterday</div>
+        </div>
+        <div class="stat-card booked">
+          <h3>Booked Slots</h3>
+          <div class="value" id="bookedSlots">0</div>
+          <div class="change"><i class="fas fa-arrow-down"></i> 5% from yesterday</div>
+        </div>
+        <div class="stat-card revenue">
+          <h3>Today's Revenue</h3>
+          <div class="value">$<span id="totalRevenue">0</span></div>
+          <div class="change"><i class="fas fa-arrow-up"></i> 18% from yesterday</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div>
+          <table id="parkingTable">
+            <thead>
+              <tr>
+                <th>Slot ID</th>
+                <th>Status</th>
+                <th>Parking Time</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Dynamic content here -->
+            </tbody>
+          </table>
+        </div>
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3>Slot Revenue Overview</h3>
+            <div class="badge badge-success">Live</div>
+          </div>
+          <canvas id="slotChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal" id="paymentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Payment Options</h3>
+        <button class="close-modal" id="closeModal">&times;</button>
+      </div>
+      
+      <div class="payment-options">
+        <div class="payment-option selected" id="visaOption">
+          <i class="fab fa-cc-visa"></i>
+          <div class="payment-details">
+            <h4>Visa</h4>
+            <p>Pay with your Visa card</p>
+          </div>
+        </div>
+        
+        <div class="payment-option" id="mastercardOption">
+          <i class="fab fa-cc-mastercard"></i>
+          <div class="payment-details">
+            <h4>Mastercard</h4>
+            <p>Pay with your Mastercard</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="payment-form">
+        <div class="form-group">
+          <label for="cardNumber">Card Number</label>
+          <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456">
+        </div>
+        
+        <div class="form-group">
+          <label for="cardName">Cardholder Name</label>
+          <input type="text" id="cardName" placeholder="John Doe">
+        </div>
+        
+        <div class="card-details">
+          <div class="form-group">
+            <label for="expiryDate">Expiry Date</label>
+            <input type="text" id="expiryDate" placeholder="MM/YY">
+          </div>
+          
+          <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" placeholder="123">
+          </div>
+        </div>
+        
+        <button class="submit-payment">Pay Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="newJs.js"></script>
+  <script src="newJs.js"></script>
+</body>
+</html>
